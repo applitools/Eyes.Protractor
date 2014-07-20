@@ -11,8 +11,9 @@
 ;(function() {
     "use strict";
 
-    var ScreenshotTaker = require('./ScreenshotTaker'),
-        webdriver = require('selenium-webdriver');
+    var EyesSDK = require('eyes.sdk');
+    var ScreenshotTaker = EyesSDK.ScreenshotTaker,
+        protractor = require('protractor');
 
     /**
      *

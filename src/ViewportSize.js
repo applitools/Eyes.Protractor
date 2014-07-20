@@ -13,9 +13,10 @@
 ;(function() {
     "use strict";
 
-    var PromiseFactory = require('./../../Eyes.Sdk.JavaScript/src/EyesPromiseFactory'),
-        webdriver = require('selenium-webdriver');
-    var Window = webdriver.WebDriver.Window;
+    var EyesSDK = require('eyes.sdk');
+    var PromiseFactory = EyesSDK.EyesPromiseFactory,
+        protractor = require('protractor');
+    var Window = protractor.WebDriver.Window;
 
     // consts
     var _GET_VIEWPORT_SIZE_JAVASCRIPT_FOR_NORMAL_BROWSER =
@@ -43,7 +44,7 @@
                 driver.executeScript(_GET_VIEWPORT_SIZE_JAVASCRIPT_FOR_NORMAL_BROWSER).then(function(size) {
                         if (size.width > 0 && size.height > 0) {
                             console.log('ViewportSize.getViewportSize - normal script returned size: w', size.width,
-                            ' h', size.height);
+                                ' h', size.height);
                             deferred.fulfill(size);
                             return;
                         }

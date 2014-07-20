@@ -14,11 +14,12 @@
 ;(function() {
     "use strict";
 
-    var EyesBase = require('./EyesBase'),
+    var EyesSDK = require('eyes.sdk');
+    var EyesBase = EyesSDK.EyesBase,
         EyesWebDriver = require('./EyesWebDriver'),
         ViewportSize = require('./ViewportSize'),
-        PromiseFactory = require('EyesPromiseFactory.js'),
-        webdriver = require('selenium-webdriver');
+        PromiseFactory = EyesSDK.EyesPromiseFactory,
+        protractor = require('protractor');
 
     /**
      *
@@ -31,8 +32,8 @@
      **/
     function Eyes(serverUrl, matchTimeout, isDisabled) {
         PromiseFactory.setPromiseHandler(function (asyncAction) {
-            return webdriver.promise.controlFlow().execute(function () {
-                var deferred = webdriver.promise.defer();
+            return protractor.promise.controlFlow().execute(function () {
+                var deferred = protractor.promise.defer();
                 asyncAction(deferred);
                 return deferred.promise;
             });
@@ -51,9 +52,9 @@
     };
 
     Eyes.prototype.open = function (driver, appName, testName, viewportSize, matchLevel, failureReports) {
-        var flow = webdriver.promise.controlFlow();
+        var flow = protractor.promise.controlFlow();
         return flow.execute(function () {
-            var deferred = webdriver.promise.defer();
+            var deferred = protractor.promise.defer();
             console.log('execution began for eyes open');
             try {
                 EyesBase.prototype.open.call(this, appName, testName, viewportSize, matchLevel, failureReports)
@@ -74,9 +75,9 @@
     };
 
     Eyes.prototype.close = function (throwEx) {
-        var flow = webdriver.promise.controlFlow();
+        var flow = protractor.promise.controlFlow();
         return flow.execute(function () {
-            var deferred = webdriver.promise.defer();
+            var deferred = protractor.promise.defer();
             console.log('execution began for eyes close');
             try {
                 EyesBase.prototype.close.call(this, throwEx)
@@ -94,9 +95,9 @@
     };
 
     Eyes.prototype.checkWindow = function (tag) {
-        var flow = webdriver.promise.controlFlow();
+        var flow = protractor.promise.controlFlow();
         return flow.execute(function () {
-            var deferred = webdriver.promise.defer();
+            var deferred = protractor.promise.defer();
             console.log('execution began for eyes check window');
             try {
                 EyesBase.prototype.checkWindow.call(this, tag, false).then(function () {
@@ -118,7 +119,7 @@
     };
 
     Eyes.prototype._waitTimeout = function (ms) {
-        return webdriver.promise.controlFlow().timeout(ms);
+        return protractor.promise.controlFlow().timeout(ms);
     };
 
     Eyes.prototype.getScreenshot = function () {
