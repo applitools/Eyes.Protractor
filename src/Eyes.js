@@ -24,20 +24,13 @@
     /**
      *
      * C'tor = initializes the module settings
-     *
+     * @param {Object} protractor
      * @param {String} serverUrl
      * @param {Number} matchTimeout
      * @param {Boolean} isDisabled - set to true to disable Applitools Eyes and use the webdriver directly.
      *
      **/
-    function Eyes(serverUrl, matchTimeout, isDisabled) {
-        PromiseFactory.setPromiseHandler(function (asyncAction) {
-            return protractor.promise.controlFlow().execute(function () {
-                var deferred = protractor.promise.defer();
-                asyncAction(deferred);
-                return deferred.promise;
-            });
-        });
+    function Eyes(protractor, serverUrl, matchTimeout, isDisabled) {
         EyesBase.call(this, serverUrl || EyesBase.DEFAULT_EYES_SERVER, matchTimeout || 2000, isDisabled);
     }
 
@@ -51,19 +44,29 @@
         EyesBase.apiKey = apiKey;
     };
 
-    Eyes.prototype.open = function (driver, appName, testName, viewportSize, matchLevel, failureReports) {
-        var flow = protractor.promise.controlFlow();
-        return flow.execute(function () {
+    Eyes.prototype.open = function (protractor, appName, testName, viewportSize, matchLevel, failureReports) {
+        var flow = this._flow = protractor.promise.controlFlow();
+        var promise = protractor.promise;
+        var driver = protractor.getInstance();
+        PromiseFactory.setPromiseHandler(function (asyncAction) {
+            return flow.execute(function () {
+                var deferred = promise.defer();
+                asyncAction(deferred);
+                return deferred.promise;
+            });
+        });
+        return this._flow.execute(function () {
             var deferred = protractor.promise.defer();
             console.log('execution began for eyes open');
             try {
+                flow.timeout(7000).then(function(){
                 EyesBase.prototype.open.call(this, appName, testName, viewportSize, matchLevel, failureReports)
                     .then(function () {
                         console.log('inner eyes open returned - fulfilling');
                         this._driver = driver; //TODO: new EyesWebDriver(driver, this);
                         // this._driver.init().then(function () {
                         deferred.fulfill(this._driver);
-                        //}.bind(this));
+                        }.bind(this));
                     }.bind(this));
             } catch (err) {
                 console.log(err);
@@ -75,8 +78,7 @@
     };
 
     Eyes.prototype.close = function (throwEx) {
-        var flow = protractor.promise.controlFlow();
-        return flow.execute(function () {
+        return this._flow.execute(function () {
             var deferred = protractor.promise.defer();
             console.log('execution began for eyes close');
             try {
@@ -95,8 +97,7 @@
     };
 
     Eyes.prototype.checkWindow = function (tag) {
-        var flow = protractor.promise.controlFlow();
-        return flow.execute(function () {
+        return this._flow.execute(function () {
             var deferred = protractor.promise.defer();
             console.log('execution began for eyes check window');
             try {
@@ -119,7 +120,7 @@
     };
 
     Eyes.prototype._waitTimeout = function (ms) {
-        return protractor.promise.controlFlow().timeout(ms);
+        return this._flow.timeout(ms);
     };
 
     Eyes.prototype.getScreenshot = function () {
