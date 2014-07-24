@@ -14,8 +14,8 @@
     "use strict";
 
     var EyesSDK = require('eyes.sdk');
-    var PromiseFactory = EyesSDK.EyesPromiseFactory,
-        protractor = require('protractor');
+    var PromiseFactory = EyesSDK.EyesPromiseFactory;
+    var protractor = require('protractor');
     var Window = protractor.WebDriver.Window;
 
     // consts

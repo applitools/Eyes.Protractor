@@ -6,7 +6,7 @@
  description: The main type - to be used by the users of the library to access all functionality.
 
  provides: [Eyes]
- requires: [ServerConnector, EyesBase]
+ requires: [eyes.sdk, EyesWebDriver, ViewportSize, protractor]
 
  ---
  */
@@ -24,20 +24,19 @@
     /**
      *
      * C'tor = initializes the module settings
-     * @param {Object} protractor
      * @param {String} serverUrl
      * @param {Number} matchTimeout
      * @param {Boolean} isDisabled - set to true to disable Applitools Eyes and use the webdriver directly.
      *
      **/
-    function Eyes(protractor, serverUrl, matchTimeout, isDisabled) {
+    function Eyes(serverUrl, matchTimeout, isDisabled) {
         EyesBase.call(this, serverUrl || EyesBase.DEFAULT_EYES_SERVER, matchTimeout || 2000, isDisabled);
     }
 
     Eyes.prototype = new EyesBase();
     Eyes.prototype.constructor = Eyes;
 
-    EyesBase.agentId = 'javascript/0.0';
+    EyesBase.agentId = 'eyes-protractor/0.0';
 
     // TODO: instance method
     Eyes.setApiKey = function (apiKey) {
