@@ -43,13 +43,11 @@
         EyesBase.apiKey = apiKey;
     };
 
-    Eyes.prototype.open = function (protractor, appName, testName, viewportSize, matchLevel, failureReports) {
-        var flow = this._flow = protractor.promise.controlFlow();
-        var promise = protractor.promise;
-        var driver = protractor.getInstance();
+    Eyes.prototype.open = function (driver, appName, testName, viewportSize, matchLevel, failureReports) {
+        var flow = this._flow = driver.controlFlow();
         PromiseFactory.setPromiseHandler(function (asyncAction) {
             return flow.execute(function () {
-                var deferred = promise.defer();
+                var deferred = protractor.promise.defer();
                 asyncAction(deferred);
                 return deferred.promise;
             });
@@ -58,14 +56,13 @@
             var deferred = protractor.promise.defer();
             console.log('execution began for eyes open');
             try {
-                flow.timeout(7000).then(function(){
                 EyesBase.prototype.open.call(this, appName, testName, viewportSize, matchLevel, failureReports)
                     .then(function () {
                         console.log('inner eyes open returned - fulfilling');
                         this._driver = driver; //TODO: new EyesWebDriver(driver, this);
                         // this._driver.init().then(function () {
                         deferred.fulfill(this._driver);
-                        }.bind(this));
+                        //}.bind(this));
                     }.bind(this));
             } catch (err) {
                 console.log(err);
