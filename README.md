@@ -30,7 +30,7 @@ var eyes = new Eyes();
 
 describe('angularjs homepage', function() {
     it('should add one and two', function() {
-        eyes.open(browser, "JavaScript SDK", "Simple Protractor Test", {width: 700, height: 500}).then(function(browser){
+        eyes.open(browser, "JavaScript SDK", "Simple Protractor Test").then(function(browser){
             browser.get('http://juliemr.github.io/protractor-demo/');
             eyes.checkWindow("Demo start");
             element(by.model('first')).sendKeys(1);
