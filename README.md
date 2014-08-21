@@ -25,8 +25,8 @@ To this:
 
 ```javascript
 var Eyes = require('eyes.protractor');
-Eyes.setApiKey("<YOUR_API_KEY>");
 var eyes = new Eyes();
+eyes.setApiKey("<YOUR_API_KEY>");
 
 describe('angularjs homepage', function() {
     it('should add one and two', function() {
