@@ -38,17 +38,19 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function () {
-        return 'eyes-protractor/0.0.7';
+        return 'eyes-protractor/0.0.8';
     };
 
     Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
         var flow = this._flow = driver.controlFlow();
-        PromiseFactory.setPromiseHandler(function (asyncAction) {
+        PromiseFactory.setFactoryMethods(function (asyncAction) {
             return flow.execute(function () {
                 var deferred = protractor.promise.defer();
                 asyncAction(deferred.fulfill, deferred.reject);
                 return deferred.promise;
             });
+        }, function () {
+            return protractor.promise.defer();
         });
         return this._flow.execute(function () {
             var deferred = protractor.promise.defer();
