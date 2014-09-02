@@ -24,7 +24,7 @@ describe('angularjs homepage', function() {
 To this:
 
 ```javascript
-var Eyes = require('eyes.protractor');
+var Eyes = require('eyes.protractor').Eyes;
 var eyes = new Eyes();
 eyes.setApiKey("<YOUR_API_KEY>");
 
@@ -38,7 +38,7 @@ describe('angularjs homepage', function() {
             eyes.checkWindow("Input Ready");
             element(by.id('gobutton')).click();
             eyes.checkWindow("Result");
-            eyes.close(true);
+            eyes.close();
 
             expect(element(by.binding('latest')).getText()).
                 toEqual('3');
