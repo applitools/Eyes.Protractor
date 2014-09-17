@@ -6,27 +6,27 @@
  description: The main type - to be used by the users of the library to access all functionality.
 
  provides: [Eyes]
- requires: [eyes.sdk, EyesWebDriver, ViewportSize, protractor]
+ requires: [eyes.sdk, EyesRemoteWebElement, ViewportSize, protractor]
 
  ---
  */
 
-;(function() {
+(function () {
     "use strict";
 
-    var EyesSDK = require('eyes.sdk');
-    var EyesBase = EyesSDK.EyesBase,
-        EyesWebDriver = require('./EyesWebDriver'),
+    var EyesSDK = require('eyes.sdk'),
+        EyesBase = EyesSDK.EyesBase,
         ViewportSize = require('./ViewportSize'),
         PromiseFactory = EyesSDK.EyesPromiseFactory,
-        protractor = require('protractor');
+        promise = require('protractor').promise,
+        EyesRemoteWebElement = require('./EyesRemoteWebElement');
 
     /**
      *
      * C'tor = initializes the module settings
      *
      * @param {String} serverUrl
-     * @param {Boolean} isDisabled - set to true to disable Applitools Eyes and use the webdriver directly.
+     * @param {Boolean} isDisabled - set to true to disable Applitools Eyes and use the protractor webdriver directly.
      *
      **/
     function Eyes(serverUrl, isDisabled) {
@@ -38,46 +38,57 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function () {
-        return 'eyes-protractor/0.0.12';
+        return 'eyes-protractor/0.0.14';
     };
 
     Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
-        var flow = this._flow = driver.controlFlow();
+        var that = this,
+            flow = that._flow = driver.controlFlow(),
+            originalElementFn = global.element;
+
+        that._driver = driver;
+
+        // extend protractor element to return ours
+        global.element = function (locator) {
+            return originalElementFn(locator).then(function (element) {
+                return new EyesRemoteWebElement(element, that, that._logger);
+            });
+        };
+
+        // Set PromiseFactory to work with the protractor control flow and promises
         PromiseFactory.setFactoryMethods(function (asyncAction) {
             return flow.execute(function () {
-                var deferred = protractor.promise.defer();
+                var deferred = promise.defer();
                 asyncAction(deferred.fulfill, deferred.reject);
                 return deferred.promise;
             });
         }, function () {
-            return protractor.promise.defer();
+            return promise.defer();
         });
-        return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+
+        return flow.execute(function () {
+            var deferred = promise.defer();
             try {
-                EyesBase.prototype.open.call(this, appName, testName, viewportSize)
+                EyesBase.prototype.open.call(that, appName, testName, viewportSize)
                     .then(function () {
-                        this._driver = driver; //TODO: new EyesWebDriver(driver, this);
-                        // this._driver.init().then(function () {
-                        deferred.fulfill(this._driver);
-                        //}.bind(this));
-                    }.bind(this));
+                        deferred.fulfill(that._driver);
+                    });
             } catch (err) {
-                this._logger.log(err.toString());
+                that._logger.log(err);
                 deferred.reject(err);
             }
 
             return deferred.promise;
-        }.bind(this));
+        });
     };
 
     Eyes.prototype.close = function (throwEx) {
-        if (typeof throwEx === 'undefined') {
+        if (throwEx === undefined) {
             throwEx = true;
         }
 
         return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+            var deferred = promise.defer();
             try {
                 EyesBase.prototype.close.call(this, throwEx)
                     .then(function (results) {
@@ -99,17 +110,17 @@
 
     Eyes.prototype.checkWindow = function (tag, matchTimeout) {
         return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+            var deferred = promise.defer();
             try {
-                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout).then(function () {
+                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout)
+                    .then(function () {
                         deferred.fulfill();
-                    }.bind(this),
-                    function (err) {
-                        this._logger.log(err.toString());
+                    }.bind(this), function (err) {
+                        this._logger.log(err);
                         deferred.reject(err);
                     }.bind(this));
             } catch (err) {
-                this._logger.log(err.toString());
+                this._logger.log(err);
                 deferred.reject(err);
             }
 
@@ -119,17 +130,17 @@
 
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+            var deferred = promise.defer();
             try {
-                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region).then(function () {
+                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
+                    .then(function () {
                         deferred.fulfill();
-                    }.bind(this),
-                    function (err) {
-                        this._logger.log(err.toString());
+                    }.bind(this), function (err) {
+                        this._logger.log(err);
                         deferred.reject(err);
                     }.bind(this));
             } catch (err) {
-                this._logger.log(err.toString());
+                this._logger.log(err);
                 deferred.reject(err);
             }
 
@@ -139,22 +150,22 @@
 
     Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
         return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+            var deferred = promise.defer();
             try {
-                element.getSize().then(function(size) {
-                    element.getLocation().then(function(point) {
+                element.getSize().then(function (size) {
+                    element.getLocation().then(function (point) {
                         var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                        EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region).then(function () {
+                        EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
+                            .then(function () {
                                 deferred.fulfill();
-                            }.bind(this),
-                            function (err) {
-                                this._logger.log(err.toString());
+                            }.bind(this), function (err) {
+                                this._logger.log(err);
                                 deferred.reject(err);
                             }.bind(this));
                     }.bind(this));
                 }.bind(this));
             } catch (err) {
-                this._logger.log(err.toString());
+                this._logger.log(err);
                 deferred.reject(err);
             }
 
@@ -164,24 +175,24 @@
 
     Eyes.prototype.checkRegionBy = function (by, tag, matchTimeout) {
         return this._flow.execute(function () {
-            var deferred = protractor.promise.defer();
+            var deferred = promise.defer();
             try {
-                this._driver.element(by).then(function(element) {
-                    element.getSize().then(function(size) {
-                        element.getLocation().then(function(point) {
+                this._driver.findElement(by).then(function (element) {
+                    element.getSize().then(function (size) {
+                        element.getLocation().then(function (point) {
                             var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                            EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region).then(function () {
+                            EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
+                                .then(function () {
                                     deferred.fulfill();
-                                }.bind(this),
-                                function (err) {
-                                    this._logger.log(err.toString());
+                                }.bind(this), function (err) {
+                                    this._logger.log(err);
                                     deferred.reject(err);
                                 }.bind(this));
                         }.bind(this));
                     }.bind(this));
                 }.bind(this));
             } catch (err) {
-                this._logger.log(err.toString());
+                this._logger.log(err);
                 deferred.reject(err);
             }
 
@@ -195,11 +206,11 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.getScreenshot = function () {
-        return this._driver.takeScreenshot().then(function (screenshot64) {
+    Eyes.prototype.getScreenShot = function () {
+        return this._driver.takeScreenshot().then(function (screenShot64) {
             // Notice that returning a value from inside "then" automatically wraps the return value with a promise,
             // so we don't have to do it explicitly.
-            return new Buffer(screenshot64, 'base64');
+            return new Buffer(screenShot64, 'base64');
         });
     };
 
@@ -211,7 +222,7 @@
         var res = "useragent:";
         return this._driver.executeScript('return navigator.userAgent').then(function (userAgent) {
             return res + userAgent;
-        }, function() {
+        }, function () {
             return res;
         });
     };
