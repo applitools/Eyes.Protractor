@@ -70,34 +70,38 @@
         });
     }
 
+    EyesRemoteWebElement.registerSendKeys = function (element, eyes, logger, args) {
+        var text = args.join('');
+        logger.verbose("registerSendKeys: text is", text);
+        return _getBounds(element).then(function (rect) {
+            eyes.addKeyboardTrigger(rect, text);
+        });
+    };
+
     EyesRemoteWebElement.prototype.sendKeys = function () {
         var that = this,
-            args = Array.prototype.slice.call(arguments, 0),
-            text = args.join('');
-        that._logger.verbose("sendKeys: text is", text);
-        return _getBounds(that._element).then(function (rect) {
-            that._eyes.addKeyboardTrigger(rect, text);
-            that._logger.verbose("calling element sendKeys: text is", text);
-            return that._element.sendKeys.call(that._element, args);
+            args = Array.prototype.slice.call(arguments, 0);
+        return EyesRemoteWebElement.registerSendKeys(that._element, that._eyes, that._logger, args)
+            .then(function () {
+                return that._element.sendKeys.call(that._element, args);
+            });
+    };
+
+    EyesRemoteWebElement.registerClick = function (element, eyes, logger) {
+        logger.verbose("apply click on element");
+        return _getBounds(element).then(function (rect) {
+            var offset = { x: rect.width / 2, y: rect.height / 2 };
+            eyes.addMouseTrigger(MouseAction.Click, rect, offset);
         });
     };
 
     EyesRemoteWebElement.prototype.click = function () {
         var that = this;
         that._logger.verbose("click on element");
-        return _getBounds(that._element).then(function (rect) {
-            var offset = { x: rect.width / 2, y: rect.height / 2 };
-            that._eyes.addMouseTrigger(MouseAction.Click, rect, offset);
-
-            return that._element.click();
-        });
-    };
-
-    EyesRemoteWebElement.prototype.element = function (locator) {
-        var that = this;
-        return this._element.element(locator).then(function (element) {
-            return new EyesRemoteWebElement(element, that._eyes, that._logger);
-        });
+        return EyesRemoteWebElement.registerClick(that._element, that._eyes, that._logger)
+            .then(function() {
+                return that._element.click();
+            });
     };
 
     EyesRemoteWebElement.prototype.findElement = function (locator) {

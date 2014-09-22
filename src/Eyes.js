@@ -6,7 +6,7 @@
  description: The main type - to be used by the users of the library to access all functionality.
 
  provides: [Eyes]
- requires: [eyes.sdk, EyesRemoteWebElement, ViewportSize, protractor]
+ requires: [eyes.sdk, ElementFinderWrapper, ViewportSize, protractor]
 
  ---
  */
@@ -19,7 +19,7 @@
         ViewportSize = require('./ViewportSize'),
         PromiseFactory = EyesSDK.EyesPromiseFactory,
         promise = require('protractor').promise,
-        EyesRemoteWebElement = require('./EyesRemoteWebElement');
+        ElementFinderWrapper = require('./ElementFinderWrapper');
 
     /**
      *
@@ -41,18 +41,11 @@
         return 'eyes-protractor/0.0.14';
     };
 
-    Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
-        var that = this,
-            flow = that._flow = driver.controlFlow(),
-            originalElementFn = global.element;
-
-        that._driver = driver;
-
+    function _init(that, flow) {
         // extend protractor element to return ours
+        var originalElementFn = global.element;
         global.element = function (locator) {
-            return originalElementFn(locator).then(function (element) {
-                return new EyesRemoteWebElement(element, that, that._logger);
-            });
+            return new ElementFinderWrapper(originalElementFn(locator), that, that._logger);
         };
 
         // Set PromiseFactory to work with the protractor control flow and promises
@@ -65,139 +58,72 @@
         }, function () {
             return promise.defer();
         });
+    }
+
+    Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
+        var that = this,
+            flow = that._flow = driver.controlFlow();
+
+        that._driver = driver;
+
+        _init(that, flow);
 
         return flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                EyesBase.prototype.open.call(that, appName, testName, viewportSize)
-                    .then(function () {
-                        deferred.fulfill(that._driver);
-                    });
-            } catch (err) {
-                that._logger.log(err);
-                deferred.reject(err);
-            }
-
-            return deferred.promise;
+            return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
         });
     };
 
-    Eyes.prototype.close = function (throwEx) {
-        if (throwEx === undefined) {
-            throwEx = true;
-        }
-
-        return this._flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                EyesBase.prototype.close.call(this, throwEx)
-                    .then(function (results) {
-                        deferred.fulfill(results);
-                    }.bind(this), function (err) {
-                        deferred.reject(err);
-                    });
-            } catch (err) {
-                deferred.reject(err);
-                if (throwEx) {
-                    throw new Error(err.message);
-                }
-            }
-
-            return deferred.promise;
-
-        }.bind(this));
-    };
-
     Eyes.prototype.checkWindow = function (tag, matchTimeout) {
-        return this._flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout)
-                    .then(function () {
-                        deferred.fulfill();
-                    }.bind(this), function (err) {
-                        this._logger.log(err);
-                        deferred.reject(err);
-                    }.bind(this));
-            } catch (err) {
-                this._logger.log(err);
-                deferred.reject(err);
-            }
-
-            return deferred.promise;
-        }.bind(this));
+        var that = this;
+        return that._flow.execute(function () {
+            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout);
+        });
     };
 
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
-        return this._flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
-                    .then(function () {
-                        deferred.fulfill();
-                    }.bind(this), function (err) {
-                        this._logger.log(err);
-                        deferred.reject(err);
-                    }.bind(this));
-            } catch (err) {
-                this._logger.log(err);
-                deferred.reject(err);
-            }
-
-            return deferred.promise;
-        }.bind(this));
+        var that = this;
+        return that._flow.execute(function () {
+            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+        });
     };
 
     Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
-        return this._flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                element.getSize().then(function (size) {
-                    element.getLocation().then(function (point) {
-                        var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                        EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
-                            .then(function () {
-                                deferred.fulfill();
-                            }.bind(this), function (err) {
-                                this._logger.log(err);
-                                deferred.reject(err);
-                            }.bind(this));
-                    }.bind(this));
-                }.bind(this));
-            } catch (err) {
-                this._logger.log(err);
-                deferred.reject(err);
-            }
+        var that = this,
+            size;
 
-            return deferred.promise;
-        }.bind(this));
+        return that._flow.execute(function () {
+            return element.getSize()
+                .then(function (elementSize) {
+                    size = elementSize;
+                    return element.getLocation();
+                })
+                .then(function (point) {
+                    var region = {height: size.height, width: size.width, left: point.x, top: point.y};
+                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+                });
+        });
     };
 
     Eyes.prototype.checkRegionBy = function (by, tag, matchTimeout) {
-        return this._flow.execute(function () {
-            var deferred = promise.defer();
-            try {
-                this._driver.findElement(by).then(function (element) {
-                    element.getSize().then(function (size) {
-                        element.getLocation().then(function (point) {
-                            var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                            EyesBase.prototype.checkWindow.call(this, tag, false, matchTimeout, region)
-                                .then(function () {
-                                    deferred.fulfill();
-                                }.bind(this), function (err) {
-                                    this._logger.log(err);
-                                    deferred.reject(err);
-                                }.bind(this));
-                        }.bind(this));
-                    }.bind(this));
-                }.bind(this));
-            } catch (err) {
-                this._logger.log(err);
-                deferred.reject(err);
-            }
+        var that = this,
+            element,
+            size;
 
-            return deferred.promise;
-        }.bind(this));
+        return that._flow.execute(function () {
+            return that._driver.findElement(by)
+                .then(function (elem) {
+                    element = elem;
+                    return element.getSize();
+                })
+                .then(function (elementSize) {
+                    size = elementSize;
+                    return element.getLocation();
+                })
+                .then(function (point) {
+                    var region = {height: size.height, width: size.width, left: point.x, top: point.y};
+                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+                });
+        });
     };
 
     //noinspection JSUnusedGlobalSymbols

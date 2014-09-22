@@ -27,7 +27,7 @@
     "main": "index",
     "dependencies": {
         "eyes.sdk": "0.0.11",
-        "protractor": "~1.0.0",
+        "protractor": "~1.2.0",
         "winston": "*"
     },
     "devDependencies": {

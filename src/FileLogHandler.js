@@ -116,6 +116,8 @@
                 })
             ]
         });
+
+        return this._logger;
     };
 
     FileLogHandler.prototype.close = function () {
@@ -131,8 +133,9 @@
      * @param {String} message
      */
     FileLogHandler.prototype.onMessage = function (verbose, message) {
+        var logger = this._logger || this.open();
         if (!verbose || this._isVerbose) {
-            this._logger.info("Eyes: " + message);
+            logger.info("Eyes: " + message);
         }
     };
 
