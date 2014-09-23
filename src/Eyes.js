@@ -60,6 +60,7 @@
         });
     }
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
         var that = this,
             flow = that._flow = driver.controlFlow();
@@ -73,6 +74,28 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
+    Eyes.prototype.close = function (throwEx) {
+        var that = this;
+
+        if (throwEx === undefined) {
+            throwEx = true;
+        }
+
+        return that._flow.execute(function () {
+            return EyesBase.prototype.close.call(that, false)
+                .then(function (results) {
+                    if (results.isPassed || !throwEx) {
+                        return results;
+                    } else {
+                        throw EyesBase.buildTestError(results, that._sessionStartInfo.scenarioIdOrName,
+                            that._sessionStartInfo.appIdOrName);
+                    }
+                });
+        });
+    };
+
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkWindow = function (tag, matchTimeout) {
         var that = this;
         return that._flow.execute(function () {
@@ -80,6 +103,7 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         var that = this;
         return that._flow.execute(function () {
@@ -87,6 +111,7 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
         var that = this,
             size;
@@ -104,6 +129,7 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkRegionBy = function (by, tag, matchTimeout) {
         var that = this,
             element,
@@ -140,10 +166,12 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getTitle = function () {
         return this._driver.getTitle();
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getInferredEnvironment = function () {
         var res = "useragent:";
         return this._driver.executeScript('return navigator.userAgent').then(function (userAgent) {
@@ -153,10 +181,12 @@
         });
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getViewportSize = function () {
         return ViewportSize.getViewportSize(this._driver);
     };
 
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.setViewportSize = function (size) {
         return ViewportSize.setViewportSize(this._driver, size);
     };

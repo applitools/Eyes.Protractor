@@ -26,11 +26,12 @@
      **/
     function FileLogHandler(isVerbose) {
         this._isVerbose = !!isVerbose;
-        this._appendToFile = true;
+        //this._appendToFile = true;
         this._fileName = "eyes.log";
         this._fileDirectory = "./";
     }
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * Whether to handle or ignore verbose log messages.
      *
@@ -40,6 +41,7 @@
         this._isVerbose = !!isVerbose;
     };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * Whether to handle or ignore verbose log messages.
      *
@@ -67,6 +69,7 @@
 //        return this._appendToFile;
 //    };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * The name of the log file.
      *
@@ -76,6 +79,7 @@
         this._fileName = fileName;
     };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * The name of the log file.
      *
@@ -85,6 +89,7 @@
         return this._fileName;
     };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * The path of the log file folder.
      *
@@ -94,6 +99,7 @@
         this._fileDirectory = fileDirectory;
     };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * The path of the log file folder.
      *
@@ -127,6 +133,7 @@
         }
     };
 
+    //noinspection JSUnusedGlobalSymbols
     /**
      * Write a message
      * @param {Boolean} verbose - is the message verbose
