@@ -96,10 +96,32 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @param mode Use one of the values in EyesBase.FailureReport.
+     */
+    Eyes.prototype.setFailureReport = function (mode) {
+        if (mode === EyesBase.FailureReport.Immediate) {
+            this._failureReportOverridden = true;
+            mode = EyesBase.FailureReport.OnClose;
+        }
+
+        EyesBase.prototype.setFailureReport.call(this, mode);
+    };
+
+    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkWindow = function (tag, matchTimeout) {
         var that = this;
         return that._flow.execute(function () {
-            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout);
+            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout)
+                .then(function (result) {
+                    if (result.asExpected || !that._failureReportOverridden) {
+                        return result;
+                    } else {
+                        throw EyesBase.buildTestError(result, that._sessionStartInfo.scenarioIdOrName,
+                            that._sessionStartInfo.appIdOrName);
+                    }
+                });
         });
     };
 
@@ -107,7 +129,15 @@
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         var that = this;
         return that._flow.execute(function () {
-            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+            return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
+                .then(function (result) {
+                    if (result.asExpected || !that._failureReportOverridden) {
+                        return result;
+                    } else {
+                        throw EyesBase.buildTestError(result, that._sessionStartInfo.scenarioIdOrName,
+                            that._sessionStartInfo.appIdOrName);
+                    }
+                });
         });
     };
 
@@ -124,7 +154,15 @@
                 })
                 .then(function (point) {
                     var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
+                        .then(function (result) {
+                            if (result.asExpected || !that._failureReportOverridden) {
+                                return result;
+                            } else {
+                                throw EyesBase.buildTestError(result, that._sessionStartInfo.scenarioIdOrName,
+                                    that._sessionStartInfo.appIdOrName);
+                            }
+                        });
                 });
         });
     };
@@ -147,7 +185,15 @@
                 })
                 .then(function (point) {
                     var region = {height: size.height, width: size.width, left: point.x, top: point.y};
-                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region);
+                    return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
+                        .then(function (result) {
+                            if (result.asExpected || !that._failureReportOverridden) {
+                                return result;
+                            } else {
+                                throw EyesBase.buildTestError(result, that._sessionStartInfo.scenarioIdOrName,
+                                    that._sessionStartInfo.appIdOrName);
+                            }
+                        });
                 });
         });
     };
