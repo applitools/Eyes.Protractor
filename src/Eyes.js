@@ -19,7 +19,8 @@
         ViewportSize = require('./ViewportSize'),
         PromiseFactory = EyesSDK.EyesPromiseFactory,
         promise = require('protractor').promise,
-        ElementFinderWrapper = require('./ElementFinderWrapper');
+        ElementFinderWrapper = require('./ElementFinderWrappers').ElementFinderWrapper,
+        ElementArrayFinderWrapper = require('./ElementFinderWrappers').ElementArrayFinderWrapper;
 
     /**
      *
@@ -46,6 +47,10 @@
         var originalElementFn = global.element;
         global.element = function (locator) {
             return new ElementFinderWrapper(originalElementFn(locator), that, that._logger);
+        };
+
+        global.element.all = function (locator) {
+            return new ElementArrayFinderWrapper(originalElementFn.all(locator), that, that._logger);
         };
 
         // Set PromiseFactory to work with the protractor control flow and promises
