@@ -21,6 +21,9 @@
         promise = require('protractor').promise,
         ElementFinderWrapper = require('./ElementFinderWrapper');
 
+    var EyesUtils = require('eyes.utils');
+    EyesUtils.setPromiseFactory(PromiseFactory);
+
     /**
      *
      * C'tor = initializes the module settings

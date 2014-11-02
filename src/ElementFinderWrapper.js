@@ -11,8 +11,7 @@
 (function () {
     "use strict";
 
-    var EyesSDK = require('eyes.sdk'),
-        GeneralUtils = EyesSDK.GeneralUtils,
+    var GeneralUtils = require('eyes.utils').GeneralUtils,
         EyesRemoteWebElement = require('./EyesRemoteWebElement');
 
     function _patchWebElement(finder, eyes, logger) {
