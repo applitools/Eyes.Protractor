@@ -17,23 +17,22 @@
     var EyesSDK = require('eyes.sdk'),
         EyesBase = EyesSDK.EyesBase,
         ViewportSize = require('./ViewportSize'),
-        PromiseFactory = EyesSDK.EyesPromiseFactory,
         promise = require('protractor').promise,
         ElementFinderWrapper = require('./ElementFinderWrapper');
 
-    var EyesUtils = require('eyes.utils');
+    var EyesUtils = require('eyes.utils'),
+        PromiseFactory = EyesUtils.PromiseFactory;
     EyesUtils.setPromiseFactory(PromiseFactory);
+    ViewportSize.setPromiseFactory(PromiseFactory);
 
     /**
      *
-     * C'tor = initializes the module settings
-     *
      * @param {String} serverUrl
      * @param {Boolean} isDisabled - set to true to disable Applitools Eyes and use the protractor webdriver directly.
-     *
+     * @constructor
      **/
     function Eyes(serverUrl, isDisabled) {
-        EyesBase.call(this, serverUrl || EyesBase.DEFAULT_EYES_SERVER, isDisabled);
+        EyesBase.call(this, PromiseFactory, serverUrl || EyesBase.DEFAULT_EYES_SERVER, isDisabled);
     }
 
     Eyes.prototype = new EyesBase();
@@ -41,7 +40,7 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function () {
-        return 'eyes-protractor/0.0.20';
+        return 'eyes-protractor/0.0.22';
     };
 
     function _init(that, flow) {
