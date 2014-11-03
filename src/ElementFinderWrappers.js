@@ -11,8 +11,7 @@
 (function () {
     "use strict";
 
-    var EyesSDK = require('eyes.sdk'),
-        GeneralUtils = EyesSDK.GeneralUtils,
+    var GeneralUtils = require('eyes.utils').GeneralUtils,
         EyesRemoteWebElement = require('./EyesRemoteWebElement');
 
     // functions in ElementFinder that return a new ElementFinder and therefore we must wrap and return our own
