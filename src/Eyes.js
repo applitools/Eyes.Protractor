@@ -44,17 +44,18 @@
         return 'eyes-protractor/0.0.27';
     };
 
-    function _init(that, flow) {
+    function _init(that, flow, isDisabled) {
         // extend protractor element to return ours
-        var originalElementFn = global.element;
-        global.element = function (locator) {
-            return new ElementFinderWrapper(originalElementFn(locator), that, that._logger);
-        };
+        if (!isDisabled) {
+            var originalElementFn = global.element;
+            global.element = function (locator) {
+                return new ElementFinderWrapper(originalElementFn(locator), that, that._logger);
+            };
 
-        global.element.all = function (locator) {
-            return new ElementArrayFinderWrapper(originalElementFn.all(locator), that, that._logger);
-        };
-
+            global.element.all = function (locator) {
+                return new ElementArrayFinderWrapper(originalElementFn.all(locator), that, that._logger);
+            };
+        }
         // Set PromiseFactory to work with the protractor control flow and promises
         PromiseFactory.setFactoryMethods(function (asyncAction) {
             return flow.execute(function () {
@@ -74,7 +75,12 @@
 
         that._driver = driver;
 
-        _init(that, flow);
+        _init(that, flow, this._isDisabled);
+
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
 
         return flow.execute(function () {
             return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
@@ -84,6 +90,11 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.close = function (throwEx) {
         var that = this;
+
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
 
         if (throwEx === undefined) {
             throwEx = true;
@@ -119,6 +130,10 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkWindow = function (tag, matchTimeout) {
         var that = this;
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
         return that._flow.execute(function () {
             return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout)
                 .then(function (result) {
@@ -135,6 +150,10 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         var that = this;
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
         return that._flow.execute(function () {
             return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
                 .then(function (result) {
@@ -152,7 +171,10 @@
     Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
         var that = this,
             size;
-
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
         return that._flow.execute(function () {
             return element.getSize()
                 .then(function (elementSize) {
@@ -179,7 +201,10 @@
         var that = this,
             element,
             size;
-
+        if (this._isDisabled) {
+            return that._flow.execute(function () {
+            });
+        }
         return that._flow.execute(function () {
             return that._driver.findElement(by)
                 .then(function (elem) {
