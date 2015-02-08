@@ -30,7 +30,7 @@ eyes.setApiKey("<YOUR_API_KEY>");
 
 describe('angularjs homepage', function() {
     it('should add one and two', function() {
-        eyes.open(protractor.getInstance().driver, "JavaScript SDK", "Simple Protractor Test");
+        eyes.open(browser, "JavaScript SDK", "Simple Protractor Test");
         browser.get('http://juliemr.github.io/protractor-demo/');
         eyes.checkWindow("Demo start");
         element(by.model('first')).sendKeys(1);
@@ -47,3 +47,5 @@ describe('angularjs homepage', function() {
 });
 
 ```
+
+Note: older Protractor versions may require passing ```protractor.getInstance().driver``` instead of ```browser``` to ```eyes.open()```
