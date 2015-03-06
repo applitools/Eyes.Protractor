@@ -27,7 +27,7 @@
     "main": "index",
     "dependencies": {
         "eyes.utils": "0.0.2",
-        "eyes.sdk": "0.0.24",
+        "eyes.sdk": "0.0.25",
         "protractor": "~1",
         "winston": "*"
     },
