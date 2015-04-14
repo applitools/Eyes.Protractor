@@ -151,6 +151,14 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
+    /**
+     * Visually validates a region in the screenshot.
+     *
+     * @param region The region to validate (in screenshot coordinates).
+     * @param tag The tag
+     * @param matchTimeout
+     * @return {*}
+     */
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         var that = this;
         if (this._isDisabled) {
@@ -185,7 +193,7 @@
                     return element.getLocation();
                 })
                 .then(function (point) {
-                    var region = {height: size.height, width: size.width, left: point.x, top: point.y};
+                    var region = {height: size.height, width: size.width, left: point.x, top: point.y, relative: true};
                     return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
                         .then(function (result) {
                             if (result.asExpected || !that._failureReportOverridden) {
@@ -219,7 +227,7 @@
                     return element.getLocation();
                 })
                 .then(function (point) {
-                    var region = {height: size.height, width: size.width, left: point.x, top: point.y};
+                    var region = {height: size.height, width: size.width, left: point.x, top: point.y, relative: true};
                     return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
                         .then(function (result) {
                             if (result.asExpected || !that._failureReportOverridden) {
@@ -255,10 +263,23 @@
                     return parsedImage;
                 }
 
-                return parsedImage.scaleImage(factor)
-                    .then(function () {
-                        return parsedImage;
+                return parsedImage.scaleImage(factor);
+            }).then(function () {
+                return parsedImage.getSize();
+            }).then(function (imageSize) {
+                // If the image is a viewport screenshot, we want to save the current scroll position (we'll need it
+                // for check region).
+                var isViewportScreenshot = imageSize.width <= that._viewportSize.width
+                    && imageSize.height <= that._viewportSize.height;
+                if (isViewportScreenshot) {
+					that._logger.verbose('Eyes.getScreenshot() - viewport screenshot found!');
+                    return BrowserUtils.getCurrentScrollPosition(that._driver).then(function (scrollPosition) {
+						that._logger.verbose('Eyes.getScreenshot() - scroll position: ', scrollPosition);
+						return parsedImage.setCoordinates(scrollPosition);
                     });
+                }
+            }).then(function () {
+                return parsedImage;
             });
     };
 
