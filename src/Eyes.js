@@ -44,7 +44,7 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function () {
-        return 'eyes-protractor/0.0.32';
+        return 'eyes-protractor/0.0.34';
     };
 
     function _init(that, flow, isDisabled) {
@@ -154,10 +154,11 @@
     /**
      * Visually validates a region in the screenshot.
      *
-     * @param region The region to validate (in screenshot coordinates).
-     * @param tag The tag
-     * @param matchTimeout
-     * @return {*}
+     * @param {Object} region The region to validate (in screenshot coordinates).
+     *                          Object is {width: *, height: *, top: *, left: *}
+     * @param {string} tag An optional tag to be associated with the screenshot.
+     * @param {int} matchTimeout The amount of time to retry matching.
+     * @return {Promise} A promise which is resolved when the validation is finished.
      */
     Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
         var that = this;
@@ -179,6 +180,14 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
+    /**
+     * Visually validates a region in the screenshot.
+     *
+     * @param {WebElement} element The element defining the region to validate.
+     * @param {string} tag An optional tag to be associated with the screenshot.
+     * @param {int} matchTimeout The amount of time to retry matching.
+     * @return {Promise} A promise which is resolved when the validation is finished.
+     */
     Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
         var that = this,
             size;
@@ -208,6 +217,14 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
+    /**
+     * Visually validates a region in the screenshot.
+     *
+     * @param {By} by The WebDriver selector used for finding the region to validate.
+     * @param {string} tag An optional tag to be associated with the screenshot.
+     * @param {int} matchTimeout The amount of time to retry matching.
+     * @return {Promise} A promise which is resolved when the validation is finished.
+     */
     Eyes.prototype.checkRegionBy = function (by, tag, matchTimeout) {
         var that = this,
             element,
@@ -257,12 +274,10 @@
             })
             .then(function(imageSize) {
                 return BrowserUtils.findImageNormalizationFactor(that._driver, imageSize, that._viewportSize);
-            })
-            .then(function(factor) {
+            }).then(function(factor) {
                 if (factor === 1) {
                     return parsedImage;
                 }
-
                 return parsedImage.scaleImage(factor);
             }).then(function () {
                 return parsedImage.getSize();
