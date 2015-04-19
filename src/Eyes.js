@@ -59,7 +59,7 @@
             };
         }
         // Set PromiseFactory to work with the protractor control flow and promises
-        this._promiseFactory.setFactoryMethods(function (asyncAction) {
+        that._promiseFactory.setFactoryMethods(function (asyncAction) {
             return flow.execute(function () {
                 var deferred = promise.defer();
                 asyncAction(deferred.fulfill, deferred.reject);
