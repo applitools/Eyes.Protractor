@@ -1,6 +1,6 @@
 {
     "name": "eyes.protractor",
-    "version": "0.0.36",
+    "version": "0.0.37",
     "description": "Applitools Eyes SDK For Protractor over Selenium JavaScript WebDriver",
     "author": "Applitools Team <team@applitools.com> (http://www.applitools.com/)",
     "keywords": [
@@ -26,8 +26,8 @@
     "license": "Apache-2.0",
     "main": "index",
     "dependencies": {
-        "eyes.utils": "0.0.6",
-        "eyes.sdk": "0.0.31",
+        "eyes.utils": "0.0.7",
+        "eyes.sdk": "0.0.32",
         "protractor": "*",
         "winston": "*"
     },
