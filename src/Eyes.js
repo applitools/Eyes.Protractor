@@ -267,10 +267,17 @@
     Eyes.prototype.getScreenShot = function () {
         var that = this;
         var parsedImage;
-        var promise = this._forceFullPage ? BrowserUtils.getFullPageScreenshot(that._driver,
-            that._promiseFactory, that._viewportSize) : that._driver.takeScreenshot();
-        return promise.then(function(screenshot64) {
-                parsedImage = new MutableImage(new Buffer(screenshot64, 'base64'), that._promiseFactory);
+        var promise;
+        if (this._forceFullPage) {
+            promise = BrowserUtils.getFullPageScreenshot(that._driver, that._promiseFactory, that._viewportSize);
+        } else {
+            promise = that._driver.takeScreenshot().then(function(screenshot64) {
+                return new MutableImage(new Buffer(screenshot64, 'base64'), that._promiseFactory);
+            });
+        }
+        return promise
+            .then(function(screenshot) {
+                parsedImage = screenshot;
                 return parsedImage.getSize();
             })
             .then(function(imageSize) {
@@ -289,10 +296,10 @@
                 var isViewportScreenshot = imageSize.width <= that._viewportSize.width
                     && imageSize.height <= that._viewportSize.height;
                 if (isViewportScreenshot) {
-					that._logger.verbose('Eyes.getScreenshot() - viewport screenshot found!');
+                    that._logger.verbose('Eyes.getScreenshot() - viewport screenshot found!');
                     return BrowserUtils.getCurrentScrollPosition(that._driver).then(function (scrollPosition) {
-						that._logger.verbose('Eyes.getScreenshot() - scroll position: ', scrollPosition);
-						return parsedImage.setCoordinates(scrollPosition);
+                        that._logger.verbose('Eyes.getScreenshot() - scroll position: ', scrollPosition);
+                        return parsedImage.setCoordinates(scrollPosition);
                     });
                 }
             }).then(function () {
