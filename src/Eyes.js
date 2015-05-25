@@ -11,20 +11,20 @@
  ---
  */
 
-(function () {
-    "use strict";
+(function() {
+    'use strict';
 
-    var EyesSDK = require('eyes.sdk'),
-        EyesBase = EyesSDK.EyesBase,
-        ViewportSize = require('./ViewportSize'),
-        promise = require('protractor').promise,
-        ElementFinderWrapper = require('./ElementFinderWrappers').ElementFinderWrapper,
-        ElementArrayFinderWrapper = require('./ElementFinderWrappers').ElementArrayFinderWrapper;
+    var EyesSDK = require('eyes.sdk');
+    var EyesBase = EyesSDK.EyesBase;
+    var ViewportSize = require('./ViewportSize');
+    var promise = require('protractor').promise;
+    var ElementFinderWrapper = require('./ElementFinderWrappers').ElementFinderWrapper;
+    var ElementArrayFinderWrapper = require('./ElementFinderWrappers').ElementArrayFinderWrapper;
 
-    var EyesUtils = require('eyes.utils'),
-        PromiseFactory = EyesUtils.PromiseFactory,
-        MutableImage = EyesUtils.MutableImage,
-        BrowserUtils = EyesUtils.BrowserUtils;
+    var EyesUtils = require('eyes.utils');
+    var PromiseFactory = EyesUtils.PromiseFactory;
+    var MutableImage = EyesUtils.MutableImage;
+    var BrowserUtils = EyesUtils.BrowserUtils;
 
     /**
      *
@@ -34,6 +34,7 @@
      **/
     function Eyes(serverUrl, isDisabled) {
         this._forceFullPage = false;
+        this._imageRotationDegrees = 0;
         this._hideScrollbars = false;
         this._stitchMode = Eyes.StitchMode.Scroll;
         this._promiseFactory = new PromiseFactory();
@@ -51,7 +52,7 @@
     });
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype._getBaseAgentId = function () {
+    Eyes.prototype._getBaseAgentId = function() {
         return 'eyes-protractor/0.0.35';
 
     };
@@ -60,51 +61,51 @@
         // extend protractor element to return ours
         if (!isDisabled) {
             var originalElementFn = global.element;
-            global.element = function (locator) {
+            global.element = function(locator) {
                 return new ElementFinderWrapper(originalElementFn(locator), that, that._logger);
             };
 
-            global.element.all = function (locator) {
+            global.element.all = function(locator) {
                 return new ElementArrayFinderWrapper(originalElementFn.all(locator), that, that._logger);
             };
         }
         // Set PromiseFactory to work with the protractor control flow and promises
-        that._promiseFactory.setFactoryMethods(function (asyncAction) {
-            return flow.execute(function () {
+        that._promiseFactory.setFactoryMethods(function(asyncAction) {
+            return flow.execute(function() {
                 var deferred = promise.defer();
                 asyncAction(deferred.fulfill, deferred.reject);
                 return deferred.promise;
             });
-        }, function () {
+        }, function() {
             return promise.defer();
         });
     }
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.open = function (driver, appName, testName, viewportSize) {
-        var that = this,
-            flow = that._flow = driver.controlFlow();
+    Eyes.prototype.open = function(driver, appName, testName, viewportSize) {
+        var that = this;
+        var flow = that._flow = driver.controlFlow();
 
         that._driver = driver;
 
         _init(that, flow, this._isDisabled);
 
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
 
-        return flow.execute(function () {
+        return flow.execute(function() {
             return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
         });
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.close = function (throwEx) {
+    Eyes.prototype.close = function(throwEx) {
         var that = this;
 
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
 
@@ -112,9 +113,9 @@
             throwEx = true;
         }
 
-        return that._flow.execute(function () {
+        return that._flow.execute(function() {
             return EyesBase.prototype.close.call(that, false)
-                .then(function (results) {
+                .then(function(results) {
                     if (results.isPassed || !throwEx) {
                         return results;
                     } else {
@@ -130,7 +131,7 @@
      *
      * @param mode Use one of the values in EyesBase.FailureReport.
      */
-    Eyes.prototype.setFailureReport = function (mode) {
+    Eyes.prototype.setFailureReport = function(mode) {
         if (mode === EyesBase.FailureReport.Immediate) {
             this._failureReportOverridden = true;
             mode = EyesBase.FailureReport.OnClose;
@@ -140,15 +141,15 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.checkWindow = function (tag, matchTimeout) {
+    Eyes.prototype.checkWindow = function(tag, matchTimeout) {
         var that = this;
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
-        return that._flow.execute(function () {
+        return that._flow.execute(function() {
             return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout)
-                .then(function (result) {
+                .then(function(result) {
                     if (result.asExpected || !that._failureReportOverridden) {
                         return result;
                     } else {
@@ -167,17 +168,17 @@
      *                          Object is {width: *, height: *, top: *, left: *}
      * @param {string} tag An optional tag to be associated with the screenshot.
      * @param {int} matchTimeout The amount of time to retry matching.
-     * @return {Promise} A promise which is resolved when the validation is finished.
+     * @return {Object} A promise which is resolved when the validation is finished.
      */
-    Eyes.prototype.checkRegion = function (region, tag, matchTimeout) {
+    Eyes.prototype.checkRegion = function(region, tag, matchTimeout) {
         var that = this;
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
-        return that._flow.execute(function () {
+        return that._flow.execute(function() {
             return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
-                .then(function (result) {
+                .then(function(result) {
                     if (result.asExpected || !that._failureReportOverridden) {
                         return result;
                     } else {
@@ -192,28 +193,28 @@
     /**
      * Visually validates a region in the screenshot.
      *
-     * @param {WebElement} element The element defining the region to validate.
+     * @param {Object} element The element defining the region to validate.
      * @param {string} tag An optional tag to be associated with the screenshot.
      * @param {int} matchTimeout The amount of time to retry matching.
-     * @return {Promise} A promise which is resolved when the validation is finished.
+     * @return {Object} A promise which is resolved when the validation is finished.
      */
-    Eyes.prototype.checkRegionByElement = function (element, tag, matchTimeout) {
-        var that = this,
-            size;
+    Eyes.prototype.checkRegionByElement = function(element, tag, matchTimeout) {
+        var that = this;
+        var size;
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
-        return that._flow.execute(function () {
+        return that._flow.execute(function() {
             return element.getSize()
-                .then(function (elementSize) {
+                .then(function(elementSize) {
                     size = elementSize;
                     return element.getLocation();
                 })
-                .then(function (point) {
+                .then(function(point) {
                     var region = {height: size.height, width: size.width, left: point.x, top: point.y, relative: true};
                     return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
-                        .then(function (result) {
+                        .then(function(result) {
                             if (result.asExpected || !that._failureReportOverridden) {
                                 return result;
                             } else {
@@ -234,28 +235,28 @@
      * @param {int} matchTimeout The amount of time to retry matching.
      * @return {Promise} A promise which is resolved when the validation is finished.
      */
-    Eyes.prototype.checkRegionBy = function (by, tag, matchTimeout) {
-        var that = this,
-            element,
-            size;
+    Eyes.prototype.checkRegionBy = function(by, tag, matchTimeout) {
+        var that = this;
+        var element;
+        var size;
         if (this._isDisabled) {
-            return that._flow.execute(function () {
+            return that._flow.execute(function() {
             });
         }
-        return that._flow.execute(function () {
+        return that._flow.execute(function() {
             return that._driver.findElement(by)
-                .then(function (elem) {
+                .then(function(elem) {
                     element = elem;
                     return element.getSize();
                 })
-                .then(function (elementSize) {
+                .then(function(elementSize) {
                     size = elementSize;
                     return element.getLocation();
                 })
-                .then(function (point) {
+                .then(function(point) {
                     var region = {height: size.height, width: size.width, left: point.x, top: point.y, relative: true};
                     return EyesBase.prototype.checkWindow.call(that, tag, false, matchTimeout, region)
-                        .then(function (result) {
+                        .then(function(result) {
                             if (result.asExpected || !that._failureReportOverridden) {
                                 return result;
                             } else {
@@ -268,77 +269,38 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype._waitTimeout = function (ms) {
+    Eyes.prototype._waitTimeout = function(ms) {
         return this._flow.timeout(ms);
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.getScreenShot = function () {
-        var that = this;
-        var parsedImage;
-        var promise;
-        if (this._forceFullPage) {
-            promise = BrowserUtils.getFullPageScreenshot(that._driver, that._promiseFactory, that._viewportSize,
-                this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS);
-        } else {
-            promise = that._driver.takeScreenshot().then(function(screenshot64) {
-                return new MutableImage(new Buffer(screenshot64, 'base64'), that._promiseFactory);
-            });
-        }
-        return promise
-            .then(function(screenshot) {
-                parsedImage = screenshot;
-                return parsedImage.getSize();
-            })
-            .then(function(imageSize) {
-                return BrowserUtils.findImageNormalizationFactor(that._driver, imageSize, that._viewportSize);
-            }).then(function(factor) {
-                if (factor === 0.5) {
-                    that._logger.verbose('Eyes.getScreenshot() - scaling to fix retina size issue!');
-                    return parsedImage.scaleImage(factor);
-                }
-                return parsedImage;
-            }).then(function () {
-                return parsedImage.getSize();
-            }).then(function (imageSize) {
-                // If the image is a viewport screenshot, we want to save the current scroll position (we'll need it
-                // for check region).
-                var isViewportScreenshot = imageSize.width <= that._viewportSize.width
-                    && imageSize.height <= that._viewportSize.height;
-                if (isViewportScreenshot) {
-                    that._logger.verbose('Eyes.getScreenshot() - viewport screenshot found!');
-                    return BrowserUtils.getCurrentScrollPosition(that._driver).then(function (scrollPosition) {
-                        that._logger.verbose('Eyes.getScreenshot() - scroll position: ', scrollPosition);
-                        return parsedImage.setCoordinates(scrollPosition);
-                    });
-                }
-            }).then(function () {
-                return parsedImage;
-            });
+    Eyes.prototype.getScreenShot = function() {
+        return BrowserUtils.getScreenshot(this._driver, this._promiseFactory, this._viewportSize, this._forceFullPage,
+            this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS, this._imageRotationDegrees);
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.getTitle = function () {
+    Eyes.prototype.getTitle = function() {
         return this._driver.getTitle();
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.getInferredEnvironment = function () {
-        var res = "useragent:";
-        return this._driver.executeScript('return navigator.userAgent').then(function (userAgent) {
+    Eyes.prototype.getInferredEnvironment = function() {
+        var res = 'useragent:';
+        return this._driver.executeScript('return navigator.userAgent').then(function(userAgent) {
             return res + userAgent;
-        }, function () {
+        }, function() {
             return res;
         });
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.getViewportSize = function () {
+    Eyes.prototype.getViewportSize = function() {
         return ViewportSize.getViewportSize(this._driver, this._promiseFactory);
     };
 
     //noinspection JSUnusedGlobalSymbols
-    Eyes.prototype.setViewportSize = function (size) {
+    Eyes.prototype.setViewportSize = function(size) {
         return ViewportSize.setViewportSize(this._driver, size, this._promiseFactory);
     };
 
@@ -350,6 +312,19 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getForceFullPageScreenshot = function() {
         return this._forceFullPage;
+    };
+
+    //noinspection JSUnusedGlobalSymbols
+    Eyes.prototype.setForcedImageRotation = function(degrees) {
+        if (typeof degrees != 'number') {
+            throw new TypeError('degrees must be a number! set to 0 to clear');
+        }
+        this._imageRotationDegrees = degrees;
+    };
+
+    //noinspection JSUnusedGlobalSymbols
+    Eyes.prototype.getForcedImageRotation = function() {
+        return this._imageRotationDegrees || 0;
     };
 
     //noinspection JSUnusedGlobalSymbols
@@ -367,7 +342,7 @@
      *
      * @param mode Use one of the values in Eyes.StitchMode.
      */
-    Eyes.prototype.setStitchMode = function (mode) {
+    Eyes.prototype.setStitchMode = function(mode) {
         switch (mode) {
             case Eyes.StitchMode.Scroll:
                 this._stitchMode = Eyes.StitchMode.Scroll;
@@ -386,7 +361,7 @@
      *
      * @return {Eyes.StitchMode} The currently set StitchMode.
      */
-    Eyes.prototype.getStitchMode = function () {
+    Eyes.prototype.getStitchMode = function() {
         return this._stitchMode;
     };
 
