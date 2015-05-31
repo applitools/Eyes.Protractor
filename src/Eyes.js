@@ -35,6 +35,8 @@
     function Eyes(serverUrl, isDisabled) {
         this._forceFullPage = false;
         this._imageRotationDegrees = 0;
+        this._automaticRotation = true;
+        this._isLandscape = false;
         this._hideScrollbars = false;
         this._stitchMode = Eyes.StitchMode.Scroll;
         this._promiseFactory = new PromiseFactory();
@@ -96,6 +98,28 @@
         }
 
         return flow.execute(function() {
+            that._driver.getCapabilities().then(function(capabilities) {
+                var platformName = capabilities.caps_.platformName;
+                var platformVersion = capabilities.caps_.platformVersion;
+                var orientation = capabilities.caps_.orientation || capabilities.caps_.deviceOrientation;
+
+                var majorVersion;
+                if (!platformVersion || platformVersion.length < 1) {
+                    return;
+                }
+                majorVersion = platformVersion.split('.', 2)[0];
+                if (platformName.toUpperCase() === 'ANDROID') {
+                    that.setHostOS('Android ' + majorVersion);
+                } else if (platformName.toUpperCase() === 'IOS') {
+                    that.setHostOS('iOS ' + majorVersion);
+                } else {
+                    return;
+                }
+
+                if (orientation && orientation.toUpperCase() === 'LANDSCAPE') {
+                    that._isLandscape = true;
+                }
+            });
             return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
         });
     };
@@ -276,7 +300,8 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getScreenShot = function() {
         return BrowserUtils.getScreenshot(this._driver, this._promiseFactory, this._viewportSize, this._forceFullPage,
-            this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS, this._imageRotationDegrees);
+            this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS, this._imageRotationDegrees,
+            this._automaticRotation, this._os === 'Android' ? 90 : 270, this._isLandscape);
     };
 
     //noinspection JSUnusedGlobalSymbols
@@ -296,7 +321,16 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getViewportSize = function() {
-        return ViewportSize.getViewportSize(this._driver, this._promiseFactory);
+        var that = this;
+        return ViewportSize.getViewportSize(that._driver, that._promiseFactory)
+            .then(function(size) {
+                var tmpH = size.height;
+                if (that._isLandscape && (size.height > size.width)) {
+                    size.height = size.width;
+                    size.width = tmpH;
+                }
+                return size;
+            });
     };
 
     //noinspection JSUnusedGlobalSymbols
@@ -320,6 +354,7 @@
             throw new TypeError('degrees must be a number! set to 0 to clear');
         }
         this._imageRotationDegrees = degrees;
+        this._automaticRotation = false;
     };
 
     //noinspection JSUnusedGlobalSymbols
