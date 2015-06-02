@@ -18,13 +18,11 @@
     var EyesBase = EyesSDK.EyesBase;
     var ViewportSize = require('./ViewportSize');
     var promise = require('protractor').promise;
-    var ElementFinderWrapper = require('./ElementFinderWrappers').ElementFinderWrapper;
-    var ElementArrayFinderWrapper = require('./ElementFinderWrappers').ElementArrayFinderWrapper;
-
     var EyesUtils = require('eyes.utils');
     var PromiseFactory = EyesUtils.PromiseFactory;
-    var MutableImage = EyesUtils.MutableImage;
     var BrowserUtils = EyesUtils.BrowserUtils;
+    var ElementFinderWrapper = require('./ElementFinderWrappers').ElementFinderWrapper;
+    var ElementArrayFinderWrapper = require('./ElementFinderWrappers').ElementArrayFinderWrapper;
 
     /**
      *
@@ -56,7 +54,6 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function() {
         return 'eyes-protractor/0.0.39';
-
     };
 
     function _init(that, flow, isDisabled) {
@@ -87,9 +84,6 @@
     Eyes.prototype.open = function(driver, appName, testName, viewportSize) {
         var that = this;
         var flow = that._flow = driver.controlFlow();
-
-        that._driver = driver;
-
         _init(that, flow, this._isDisabled);
 
         if (this._isDisabled) {
@@ -97,30 +91,35 @@
             });
         }
 
+        that._driver = driver;
+
         return flow.execute(function() {
-            that._driver.getCapabilities().then(function(capabilities) {
-                var platformName = capabilities.caps_.platformName;
-                var platformVersion = capabilities.caps_.platformVersion;
-                var orientation = capabilities.caps_.orientation || capabilities.caps_.deviceOrientation;
+            return that._driver.getCapabilities()
+                .then(function(capabilities) {
+                    var platformName = capabilities.caps_.platformName;
+                    var platformVersion = capabilities.caps_.platformVersion;
+                    var orientation = capabilities.caps_.orientation || capabilities.caps_.deviceOrientation;
 
-                var majorVersion;
-                if (!platformVersion || platformVersion.length < 1) {
-                    return;
-                }
-                majorVersion = platformVersion.split('.', 2)[0];
-                if (platformName.toUpperCase() === 'ANDROID') {
-                    that.setHostOS('Android ' + majorVersion);
-                } else if (platformName.toUpperCase() === 'IOS') {
-                    that.setHostOS('iOS ' + majorVersion);
-                } else {
-                    return;
-                }
+                    var majorVersion;
+                    if (!platformVersion || platformVersion.length < 1) {
+                        return;
+                    }
+                    majorVersion = platformVersion.split('.', 2)[0];
+                    if (platformName.toUpperCase() === 'ANDROID') {
+                        that.setHostOS('Android ' + majorVersion);
+                    } else if (platformName.toUpperCase() === 'IOS') {
+                        that.setHostOS('iOS ' + majorVersion);
+                    } else {
+                        return;
+                    }
 
-                if (orientation && orientation.toUpperCase() === 'LANDSCAPE') {
-                    that._isLandscape = true;
-                }
-            });
-            return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
+                    if (orientation && orientation.toUpperCase() === 'LANDSCAPE') {
+                        that._isLandscape = true;
+                    }
+                })
+                .then(function() {
+                    return EyesBase.prototype.open.call(that, appName, testName, viewportSize);
+                });
         });
     };
 
@@ -132,7 +131,6 @@
             return that._flow.execute(function() {
             });
         }
-
         if (throwEx === undefined) {
             throwEx = true;
         }
@@ -151,23 +149,9 @@
     };
 
     //noinspection JSUnusedGlobalSymbols
-    /**
-     *
-     * @param mode Use one of the values in EyesBase.FailureReport.
-     */
-    Eyes.prototype.setFailureReport = function(mode) {
-        if (mode === EyesBase.FailureReport.Immediate) {
-            this._failureReportOverridden = true;
-            mode = EyesBase.FailureReport.OnClose;
-        }
-
-        EyesBase.prototype.setFailureReport.call(this, mode);
-    };
-
-    //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.checkWindow = function(tag, matchTimeout) {
         var that = this;
-        if (this._isDisabled) {
+        if (that._isDisabled) {
             return that._flow.execute(function() {
             });
         }
@@ -312,25 +296,31 @@
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getInferredEnvironment = function() {
         var res = 'useragent:';
-        return this._driver.executeScript('return navigator.userAgent').then(function(userAgent) {
-            return res + userAgent;
-        }, function() {
-            return res;
-        });
+        return this._driver.executeScript('return navigator.userAgent')
+            .then(function(userAgent) {
+                return res + userAgent;
+            }, function() {
+                return res;
+            });
+    };
+
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @param mode Use one of the values in EyesBase.FailureReport.
+     */
+    Eyes.prototype.setFailureReport = function(mode) {
+        if (mode === EyesBase.FailureReport.Immediate) {
+            this._failureReportOverridden = true;
+            mode = EyesBase.FailureReport.OnClose;
+        }
+
+        EyesBase.prototype.setFailureReport.call(this, mode);
     };
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype.getViewportSize = function() {
-        var that = this;
-        return ViewportSize.getViewportSize(that._driver, that._promiseFactory)
-            .then(function(size) {
-                var tmpH = size.height;
-                if (that._isLandscape && (size.height > size.width)) {
-                    size.height = size.width;
-                    size.width = tmpH;
-                }
-                return size;
-            });
+        return ViewportSize.getViewportSize(this._driver, this._promiseFactory);
     };
 
     //noinspection JSUnusedGlobalSymbols
