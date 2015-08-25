@@ -53,7 +53,7 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function() {
-        return 'eyes-protractor/0.0.42';
+        return 'eyes-protractor/0.0.43';
     };
 
     function _init(that, flow, isDisabled) {
