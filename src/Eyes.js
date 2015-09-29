@@ -53,7 +53,7 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function() {
-        return 'eyes-protractor/0.0.43';
+        return 'eyes-protractor/0.0.45';
     };
 
     function _init(that, flow, isDisabled) {
@@ -106,9 +106,13 @@
                     }
                     majorVersion = platformVersion.split('.', 2)[0];
                     if (platformName.toUpperCase() === 'ANDROID') {
-                        that.setHostOS('Android ' + majorVersion);
+                        if (!that.getHostOS()) {
+                            that.setHostOS('Android ' + majorVersion);
+                        }
                     } else if (platformName.toUpperCase() === 'IOS') {
-                        that.setHostOS('iOS ' + majorVersion);
+                        if (!that.getHostOS()) {
+                            that.setHostOS('iOS ' + majorVersion);
+                        }
                     } else {
                         return;
                     }
