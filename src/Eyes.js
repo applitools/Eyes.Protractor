@@ -106,6 +106,7 @@
                     }
                     majorVersion = platformVersion.split('.', 2)[0];
                     if (platformName.toUpperCase() === 'ANDROID') {
+                        // We only automatically set the OS, if the user hadn't manually set it previously.
                         if (!that.getHostOS()) {
                             that.setHostOS('Android ' + majorVersion);
                         }
