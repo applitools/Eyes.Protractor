@@ -8,3 +8,5 @@ exports.ConsoleLogHandler = EyesSDK.ConsoleLogHandler;
 exports.NullLogHandler  = EyesSDK.NullLogHandler;
 var eyesBase = EyesSDK.EyesBase;
 exports.FailureReport = eyesBase.FailureReport;
+var EyesUtils = require('eyes.utils');
+exports.TestResultsFormatter = EyesUtils.TestResultsFormatter;

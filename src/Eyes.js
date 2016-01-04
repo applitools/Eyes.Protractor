@@ -53,7 +53,7 @@
 
     //noinspection JSUnusedGlobalSymbols
     Eyes.prototype._getBaseAgentId = function() {
-        return 'eyes-protractor/0.0.46';
+        return 'eyes-protractor/0.0.47';
     };
 
     function _init(that, flow, isDisabled) {
@@ -141,14 +141,21 @@
         }
 
         return that._flow.execute(function() {
-            return EyesBase.prototype.close.call(that, false)
+            // FIXME - remove this if the replacement code below works
+            //return EyesBase.prototype.close.call(that, false)
+            //    .then(function(results) {
+            //        if (results.isPassed || !throwEx) {
+            //            return results;
+            //        } else {
+            //            throw EyesBase.buildTestError(results, that._sessionStartInfo.scenarioIdOrName,
+            //                that._sessionStartInfo.appIdOrName);
+            //        }
+            //    });
+            return EyesBase.prototype.close.call(that, throwEx)
                 .then(function(results) {
-                    if (results.isPassed || !throwEx) {
-                        return results;
-                    } else {
-                        throw EyesBase.buildTestError(results, that._sessionStartInfo.scenarioIdOrName,
-                            that._sessionStartInfo.appIdOrName);
-                    }
+                    return results;
+                }, function (err) {
+                    throw err;
                 });
         });
     };
