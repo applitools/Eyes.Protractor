@@ -140,36 +140,25 @@
       throwEx = true;
     }
 
-<<<<<<< HEAD
-        return that._flow.execute(function() {
-            // FIXME - remove this if the replacement code below works
-            //return EyesBase.prototype.close.call(that, false)
-            //    .then(function(results) {
-            //        if (results.isPassed || !throwEx) {
-            //            return results;
-            //        } else {
-            //            throw EyesBase.buildTestError(results, that._sessionStartInfo.scenarioIdOrName,
-            //                that._sessionStartInfo.appIdOrName);
-            //        }
-            //    });
-            return EyesBase.prototype.close.call(that, throwEx)
-                .then(function(results) {
-                    return results;
-                }, function (err) {
-                    throw err;
-                });
+    return that._flow.execute(function() {
+        return EyesBase.prototype.close.call(that, throwEx)
+            .then(function(results) {
+                return results;
+            }, function (err) {
+                throw err;
+            });
         });
     };
 
-    /**
-     * A helper function for creating region objects to be used in checkWindow
-     * @param {Object} point A point which represents the location of the region (x,y).
-     * @param {Object} size The size of the region (width, height).
-     * @param {boolean} isRelative Whether or not the region coordinates are relative to the image coordinates.
-     * @return {Object} A region object.
-     */
-    var createRegion = function (point, size, isRelative) {
-        return {left: Math.ceil(point.x), top: Math.ceil(point.y), width: Math.ceil(size.width),
+  /**
+   * A helper function for creating region objects to be used in checkWindow
+   * @param {Object} point A point which represents the location of the region (x,y).
+   * @param {Object} size The size of the region (width, height).
+   * @param {boolean} isRelative Whether or not the region coordinates are relative to the image coordinates.
+   * @return {Object} A region object.
+   */
+   var createRegion = function (point, size, isRelative) {
+      return {left: Math.ceil(point.x), top: Math.ceil(point.y), width: Math.ceil(size.width),
             height: Math.ceil(size.height), relative: isRelative};
     };
 
@@ -225,87 +214,9 @@
         }
         return that._flow.execute(function() {
             return callCheckWindowBase(that, tag, false, matchTimeout, region)
-=======
-    return that._flow.execute(function() {
-      return EyesBase.prototype.close.call(that, false)
-        .then(function(results) {
-          if (results.isPassed || !throwEx) {
-            return results;
-          } else {
-            throw EyesBase.buildTestError(results, that._sessionStartInfo.scenarioIdOrName,
-              that._sessionStartInfo.appIdOrName);
-          }
->>>>>>> 0a87d59634a05c0ff75086738893180948d8335d
         });
-    });
-  };
+    };
 
-  /**
-   * A helper function for creating region objects to be used in checkWindow
-   * @param {Object} point A point which represents the location of the region (x,y).
-   * @param {Object} size The size of the region (width, height).
-   * @param {boolean} isRelative Whether or not the region coordinates are relative to the image coordinates.
-   * @return {Object} A region object.
-   */
-  var createRegion = function (point, size, isRelative) {
-    return {left: Math.ceil(point.x), top: Math.ceil(point.y), width: Math.ceil(size.width),
-      height: Math.ceil(size.height), relative: isRelative};
-  };
-
-  /**
-   * A helper function for calling the checkWindow on {@code EyesBase} and handling the result.
-   * @param {Eyes} eyes The Eyes object (a derivative of EyesBase) on which to perform the call.
-   * @param {String} tag The tag for the current visual checkpoint.
-   * @param {boolean} ignoreMismatch Whether or not the server should ignore a mismatch.
-   * @param {int} retryTimeout The timeout. (Milliseconds).
-   * @param {Object} region The region to check. Should be of the form  {width, height, left, top}.
-   * @returns {Promise} A promise which resolves to the checkWindow result, or an exception of the result failed
-   *                      and failure reports are immediate.
-   */
-  var callCheckWindowBase = function (eyes, tag, ignoreMismatch, retryTimeout, region) {
-    return EyesBase.prototype.checkWindow.call(eyes, tag, false, retryTimeout, region)
-      .then(function(result) {
-        if (result.asExpected || !eyes._failureReportOverridden) {
-          return result;
-        } else {
-          throw EyesBase.buildTestError(result, eyes._sessionStartInfo.scenarioIdOrName,
-            eyes._sessionStartInfo.appIdOrName);
-        }
-      });
-  };
-
-  //noinspection JSUnusedGlobalSymbols
-  Eyes.prototype.checkWindow = function(tag, matchTimeout) {
-    var that = this;
-    if (that._isDisabled) {
-      return that._flow.execute(function() {
-      });
-    }
-    return that._flow.execute(function() {
-      return callCheckWindowBase(that, tag, false, matchTimeout, undefined);
-    });
-  };
-
-  //noinspection JSUnusedGlobalSymbols
-  /**
-   * Visually validates a region in the screenshot.
-   *
-   * @param {Object} region The region to validate (in screenshot coordinates).
-   *                          Object is {width: *, height: *, top: *, left: *}
-   * @param {string} tag An optional tag to be associated with the screenshot.
-   * @param {int} matchTimeout The amount of time to retry matching.
-   * @return {Object} A promise which is resolved when the validation is finished.
-   */
-  Eyes.prototype.checkRegion = function(region, tag, matchTimeout) {
-    var that = this;
-    if (this._isDisabled) {
-      return that._flow.execute(function() {
-      });
-    }
-    return that._flow.execute(function() {
-      return callCheckWindowBase(that, tag, false, matchTimeout, region)
-    });
-  };
 
   //noinspection JSUnusedGlobalSymbols
   /**
