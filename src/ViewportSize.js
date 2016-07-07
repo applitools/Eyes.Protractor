@@ -124,7 +124,7 @@
                                 resolve();
                                 return;
                             }
-                          _retryCheckWindowSize(driver, requiredBrowserSize, 3, promiseFactory).then(function (retriesLeft) {
+                          _retryCheckWindowSize(driver, requiredBrowserSize, 3, promiseFactory).then(function () {
                               _checkViewportSize(driver, size, promiseFactory)
                                 .then(function () {
                                   resolve();
