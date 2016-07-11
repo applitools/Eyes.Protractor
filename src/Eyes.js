@@ -38,7 +38,9 @@
     this._hideScrollbars = false;
     this._stitchMode = Eyes.StitchMode.Scroll;
     this._promiseFactory = new PromiseFactory();
-    EyesBase.call(this, this._promiseFactory, serverUrl || EyesBase.DEFAULT_EYES_SERVER, isDisabled);
+    this._waitBeforeScreenshots = 100;
+
+      EyesBase.call(this, this._promiseFactory, serverUrl || EyesBase.DEFAULT_EYES_SERVER, isDisabled);
   }
 
   Eyes.prototype = new EyesBase();
@@ -295,7 +297,7 @@
   Eyes.prototype.getScreenShot = function() {
     return BrowserUtils.getScreenshot(this._driver, this._promiseFactory, this._viewportSize, this._forceFullPage,
       this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS, this._imageRotationDegrees,
-      this._automaticRotation, this._os === 'Android' ? 90 : 270, this._isLandscape);
+      this._automaticRotation, this._os === 'Android' ? 90 : 270, this._isLandscape, this._waitBeforeScreenshots);
   };
 
   //noinspection JSUnusedGlobalSymbols
@@ -335,7 +337,8 @@
 
   //noinspection JSUnusedGlobalSymbols
   Eyes.prototype.setViewportSize = function(size) {
-    return ViewportSize.setViewportSize(this._driver, size, this._promiseFactory);
+      var that = this;
+      return ViewportSize.setViewportSize(this._driver, size, this._promiseFactory, that._logger);
   };
 
   //noinspection JSUnusedGlobalSymbols
@@ -399,6 +402,15 @@
   Eyes.prototype.getStitchMode = function() {
     return this._stitchMode;
   };
+
+    //noinspection JSUnusedGlobalSymbols
+    Eyes.prototype.setWaitBeforeScreenshots = function (waitBeforeScreenshots) {
+        if (waitBeforeScreenshots <= 0) {
+            this._waitBeforeScreenshots = this._waitBeforeScreenshots;
+        } else {
+            this._waitBeforeScreenshots = waitBeforeScreenshots;
+        }
+    }
 
   module.exports = Eyes;
 }());
