@@ -63,93 +63,22 @@
           return new EyesRemoteWebElement(finder.sendKeys.call(finder, args), eyes, logger);
         });
     };
-
-    // Wrap the getId function
-    this.getId = function () {
-      logger.verbose("ElementFinderWrapper:getId - called");
-      return finder.getWebElement().getId();
-    };
-
-    // Wrap the getTagName function
-    this.getTagName = function () {
-      logger.verbose("ElementFinderWrapper:getTagName - called");
-      return finder.getWebElement().getTagName();
-    };
-
-    // Wrap the getCssValue function
-    this.getCssValue = function (args) {
-      logger.verbose("ElementFinderWrapper:getCssValue - called");
-      return finder.getWebElement().getCssValue(args);
-    };
-
-    // Wrap the getAttribute function
-    this.getAttribute = function (args) {
-      logger.verbose("ElementFinderWrapper:getAttribute - called");
-      return finder.getWebElement().getAttribute(args);
-    };
     
-    // Wrap the getText function
-    this.getText = function () {
-      logger.verbose("ElementFinderWrapper:getText - called");
-      return finder.getWebElement().getText();
-    };
+    var that = this;
+    var elMethods = Object.getOwnPropertyNames(finder);
+    var wrapMethods = Object.getOwnPropertyNames(this);
 
-    // Wrap the getSize function
-    this.getSize = function () {
-      logger.verbose("ElementFinderWrapper:getSize - called");
-      return finder.getWebElement().getSize();
-    };
-
-    // Wrap the getLocation function
-    this.getLocation = function () {
-      logger.verbose("ElementFinderWrapper:getLocation - called");
-      return finder.getWebElement().getLocation();
-    };
-
-    // Wrap the isEnabled function
-    this.isEnabled = function () {
-      logger.verbose("ElementFinderWrapper:isEnabled - called");
-      return finder.getWebElement().isEnabled();
-    };
-
-    // Wrap the isSelected function
-    this.isSelected = function () {
-      logger.verbose("ElementFinderWrapper:isSelected - called");
-      return finder.getWebElement().isSelected();
-    };
-
-    // Wrap the submit function
-    this.submit = function () {
-      logger.verbose("ElementFinderWrapper:submit - called");
-      return finder.getWebElement().submit();
-    };
-
-    // Wrap the clear function
-    this.clear = function () {
-      logger.verbose("ElementFinderWrapper:clear - called");
-      return finder.getWebElement().clear();
-    };
-
-    // Wrap the isDisplayed function
-    this.isDisplayed = function () {
-      logger.verbose("ElementFinderWrapper:isDisplayed - called");
-      return finder.getWebElement().isDisplayed();
-    };
-
-    // Wrap the getOuterHtml function
-    this.getOuterHtml = function () {
-      logger.verbose("ElementFinderWrapper:getOuterHtml - called");
-      return finder.getWebElement().getOuterHtml();
-    };
-
-    // Wrap the getInnerHtml function
-    this.getInnerHtml = function () {
-      logger.verbose("ElementFinderWrapper:getInnerHtml - called");
-      return finder.getWebElement().getInnerHtml();
-    };
+    // Wrap for simple methods of selenium WebDriver object
+    elMethods.filter(function(i) {
+        return wrapMethods.indexOf(i) < 0 && i.indexOf('_') < 0
+    }).forEach(function(fnName) {
+      that[fnName] = function () {
+        logger.verbose("ElementFinderWrapper:" + fnName + " - called");
+          return finder[fnName].apply(finder, arguments);
+        };
+    });
 
     // Wrap the functions that return objects that require pre-wrapping
-    var that = this;
     ELEMENT_FINDER_TO_ELEMENT_FINDER_FUNCTIONS.forEach(function(fnName) {
       that[fnName] = function () {
         return new ElementFinderWrapper(finder[fnName].apply(finder, arguments), eyes, logger);
