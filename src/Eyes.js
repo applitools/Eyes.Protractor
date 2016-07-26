@@ -56,7 +56,7 @@
 
   //noinspection JSUnusedGlobalSymbols
   Eyes.prototype._getBaseAgentId = function() {
-    return 'eyes-protractor/0.0.51';
+    return 'eyes-protractor/0.0.53';
   };
 
   function _init(that, flow, isDisabled) {
@@ -109,7 +109,7 @@
             platformVersion = capabilities.get('version');
             orientation = capabilities.get('orientation') || capabilities.get('deviceOrientation');
           }
-          
+
           var majorVersion;
           if (!platformVersion || platformVersion.length < 1) {
             return;
