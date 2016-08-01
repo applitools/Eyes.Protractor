@@ -10,3 +10,5 @@ var eyesBase = EyesSDK.EyesBase;
 exports.FailureReport = eyesBase.FailureReport;
 var EyesUtils = require('eyes.utils');
 exports.TestResultsFormatter = EyesUtils.TestResultsFormatter;
+exports.SessionEventHandler = EyesSDK.SessionEventHandler;
+exports.RemoteSessionEventHandler = EyesSDK.RemoteSessionEventHandler;

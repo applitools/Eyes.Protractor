@@ -426,5 +426,23 @@
         return this._waitBeforeScreenshots;
     };
 
+    //noinspection JSUnusedGlobalSymbols
+    /**
+     *
+     * @returns {Promise} A promise which resolves to the webdriver's session ID.
+     */
+    Eyes.prototype.getAUTSessionId = function () {
+        return this._promiseFactory.makePromise(function (resolve) {
+            if (!this._driver) {
+                resolve(undefined);
+                return;
+            }
+            this._driver.getSession()
+                .then(function (session) {
+                    resolve(session.getId());
+                });
+        }.bind(this));
+    };
+
   module.exports = Eyes;
 }());
