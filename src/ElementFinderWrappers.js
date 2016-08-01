@@ -60,7 +60,7 @@
           return EyesRemoteWebElement.registerSendKeys(element, eyes, logger, args);
         })
         .then(function () {
-          return new EyesRemoteWebElement(finder.sendKeys.call(finder, args), eyes, logger);
+          return new EyesRemoteWebElement(finder.sendKeys.apply(finder, args), eyes, logger);
         });
     };
 
