@@ -16,7 +16,6 @@
 
   var EyesSDK = require('eyes.sdk');
   var EyesBase = EyesSDK.EyesBase;
-  var ViewportSize = require('./ViewportSize');
   var promise = require('q');
   var EyesUtils = require('eyes.utils');
   var PromiseFactory = EyesUtils.PromiseFactory;
@@ -223,7 +222,8 @@
             });
         }
         return that._flow.execute(function() {
-            return callCheckWindowBase(that, tag, false, matchTimeout, region)
+            that._regionToCheck = region;
+            return callCheckWindowBase(that, tag, false, matchTimeout, that._regionToCheck)
         });
     };
 
@@ -251,7 +251,8 @@
           return element.getLocation();
         })
         .then(function(point) {
-          return callCheckWindowBase(that, tag, false, matchTimeout, createRegion(point, size, true))
+            that._regionToCheck = createRegion(point, size, true);
+          return callCheckWindowBase(that, tag, false, matchTimeout, that._regionToCheck)
         });
     });
   };
@@ -284,7 +285,8 @@
           return element.getLocation();
         })
         .then(function(point) {
-          return callCheckWindowBase(that, tag, false, matchTimeout, createRegion(point, size, true))
+          that._regionToCheck = createRegion(point, size, true);
+          return callCheckWindowBase(that, tag, false, matchTimeout, that._regionToCheck)
         });
     });
   };
@@ -298,7 +300,7 @@
   Eyes.prototype.getScreenShot = function() {
     return BrowserUtils.getScreenshot(this._driver, this._promiseFactory, this._viewportSize, this._forceFullPage,
       this._hideScrollbars, this._stitchMode === Eyes.StitchMode.CSS, this._imageRotationDegrees,
-      this._automaticRotation, this._os === 'Android' ? 90 : 270, this._isLandscape, this._waitBeforeScreenshots);
+      this._automaticRotation, this._os === 'Android' ? 90 : 270, this._isLandscape, this._waitBeforeScreenshots, this._regionToCheck);
   };
 
   //noinspection JSUnusedGlobalSymbols
@@ -333,12 +335,12 @@
 
   //noinspection JSUnusedGlobalSymbols
   Eyes.prototype.getViewportSize = function() {
-    return ViewportSize.getViewportSize(this._driver, this._promiseFactory);
+    return BrowserUtils.getViewportSize(this._driver, this._promiseFactory);
   };
 
   //noinspection JSUnusedGlobalSymbols
   Eyes.prototype.setViewportSize = function(size) {
-    return ViewportSize.setViewportSize(this._driver, size, this._promiseFactory, this._logger);
+    return BrowserUtils.setViewportSize(this._driver, size, this._promiseFactory, this._logger, false);
   };
 
   //noinspection JSUnusedGlobalSymbols
