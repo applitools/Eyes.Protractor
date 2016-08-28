@@ -1,5 +1,4 @@
 exports.Eyes = require('./src/Eyes');
-exports.FileLogHandler = require('./src/FileLogHandler');
 var EyesSDK = require('eyes.sdk');
 exports.MatchLevel = EyesSDK.MatchLevel;
 exports.ImageMatchSettings = EyesSDK.ImageMatchSettings;
