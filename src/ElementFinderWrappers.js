@@ -63,9 +63,22 @@
           return new EyesRemoteWebElement(finder.sendKeys.apply(finder, args), eyes, logger);
         });
     };
+    
+    var that = this;
+    var elMethods = Object.getOwnPropertyNames(finder);
+    var wrapMethods = Object.getOwnPropertyNames(this);
+
+    // Wrap for simple methods of selenium WebDriver object
+    elMethods.filter(function(i) {
+        return wrapMethods.indexOf(i) < 0 && i.indexOf('_') < 0
+    }).forEach(function(fnName) {
+      that[fnName] = function () {
+        logger.verbose("ElementFinderWrapper:" + fnName + " - called");
+          return finder[fnName].apply(finder, arguments);
+        };
+    });
 
     // Wrap the functions that return objects that require pre-wrapping
-    var that = this;
     ELEMENT_FINDER_TO_ELEMENT_FINDER_FUNCTIONS.forEach(function(fnName) {
       that[fnName] = function () {
         return new ElementFinderWrapper(finder[fnName].apply(finder, arguments), eyes, logger);
