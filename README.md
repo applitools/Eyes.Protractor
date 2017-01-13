@@ -1,3 +1,8 @@
+# DEPRECATED
+
+This repository is available for legacy purposes. Please use https://github.com/applitools/Eyes.Selenium.JavaScript instead.
+
+
 Eyes.Protractor
 ==========================
 
